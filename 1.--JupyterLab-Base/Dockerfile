@@ -1,11 +1,11 @@
 #
-# docker build --tag=jdvelasq/jupyterlab-base .
-# docker push jdvelasq/jupyterlab-base
-# docker run --rm -it -v "$PWD":/datalake --name jlab-base -p 8888:8888 -p 5000:5000 jdvelasq/jupyterlab-base
-# docker run --rm -it -v datalake:/datalake -name jlab-base -p 8888:8888 jdvelasq/jupyterlab-base
-# docker exec -it jlab-base bash
+# docker build --tag=jdvelasq/python3:vscode-minimal .
+# docker push jdvelasq/python3:vscode-minimal .
+# docker run --rm -it -v "$PWD":/datalake --name python3-vscode-minimal -p 8888:8888 -p 5000:5000 jdvelasq/python3:vscode-minimal .
+# docker run --rm -it -v datalake:/datalake -name python3-vscode-minimal -p 8888:8888 jdvelasq/python3:vscode-minimal .
+# docker exec -it python3-vscode-minimal bash
 #
-# docker run --rm -it  --name jlab-base -p 8888:8888 -p 5000:5000 jdvelasq/jupyterlab-base
+# docker run --rm -it  --name python3-vscode-minimal -p 8888:8888 -p 5000:5000 jdvelasq/python3:vscode-minimal
 #
 FROM ubuntu:18.04
 
@@ -69,11 +69,10 @@ RUN apt-get update \
     && apt-get install -yq --no-install-recommends \
     build-essential \
     python-dev \
-    python3.6 \
+    python3-minimal \
     python3-pip \
     python3-dev \       
     python3-venv \ 
-    ipython \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* \
@@ -100,7 +99,14 @@ RUN jupyter labextension install \
     isort \
     && jupyter serverextension enable --system --py jupyterlab_code_formatter
 
-RUN pip install --trusted-host pypi.python.org --upgrade --default-timeout=100 ipywidgets
+RUN jupyter labextension install nbdime-jupyterlab@2.0.0 \
+    && pip install --trusted-host pypi.python.org --upgrade --default-timeout=100 jupyterlab-git \
+    && jupyter lab build
+
+
+RUN jupyter labextension install @jupyterlab/github
+
+## RUN pip install --trusted-host pypi.python.org --upgrade --default-timeout=100 ipywidgets
 
 #---------------------------------------------------
 # unicode warning
@@ -114,27 +120,36 @@ RUN pip install --trusted-host pypi.python.org --default-timeout=100 jupyter-lsp
 #
 # Python base installation
 #
-RUN pip install --trusted-host pypi.python.org  --default-timeout=100 \
-    numpy \
-    pandas \
-    scipy \
-    matplotlib \
-    sklearn
+# RUN pip install --trusted-host pypi.python.org  --default-timeout=100 \
+#     numpy \
+#     pandas \
+#     scipy \
+#     matplotlib \
+#     sklearn
 
 #
 # VS Code
 #
-# RUN pip install --trusted-host pypi.python.org  --default-timeout=100 \
-#     rope \
-#     bandit \
-#     flake8 \
+RUN pip install --trusted-host pypi.python.org  --default-timeout=100 \
+    bandit \
+    flake8 \
+    jedi \
+    mypy \
+    nose \
+    poetry \
+    prospector \
+    pycodestyle \
+    pylama \
+    pylint \
+    pytest \
+    rope \
+    yapf
+
 #     jinja2 \
 #     m2r \
-#     mypy \
 #     nose \
 #     paver \
-#     pylint \
-#     pytest  \
+
 
 
 # RUN echo "import nltk; nltk.download('stopwords'); nltk.download('wordnet'); nltk.download('averaged_perceptron_tagger')" > n.py \
